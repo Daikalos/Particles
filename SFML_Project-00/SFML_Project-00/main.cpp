@@ -1,25 +1,41 @@
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
+#include <gl/GL.h>
+#include <gl/GLU.h>
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-	
-	sf::CircleShape shape(100.0f);
-	shape.setFillColor(sf::Color::Green);
+	sf::Window window(sf::VideoMode(800, 600), "OpenGL");
+	window.setActive(true);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0, window.getSize().x / window.getSize().y, 1.0, 500.0);
+	glMatrixMode(GL_MODELVIEW);
 
 	while (window.isOpen())
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			switch (event.type)
 			{
-				window.close();
+				case sf::Event::Closed:
+					window.close();
+					break;
+				case sf::Event::Resized:
+					glViewport(0, 0, event.size.width, event.size.height);
+					break;
 			}
 		}
 
-		window.clear();
-		window.draw(shape);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
 		window.display();
 	}
 
