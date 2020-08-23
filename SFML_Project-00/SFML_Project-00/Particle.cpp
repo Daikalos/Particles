@@ -11,17 +11,12 @@ Particle::~Particle()
 
 }
 
-void Particle::Update(const float& deltaTime, const bool& mousePressed)
+void Particle::Update(const sf::Time& deltaTime)
 {
-	m_Position += m_Velocity * deltaTime;
-
-	if (mousePressed)
-	{
-		m_Velocity = sf::Vector2f(-0.1f, -0.01f);
-	}
+	m_Position += m_Velocity * deltaTime.asSeconds();
 }
 
-void Particle::Draw() const
+void Particle::ChangeVelocity(const sf::Vector2f velocity)
 {
-
+	m_Velocity = velocity;
 }

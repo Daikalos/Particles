@@ -19,8 +19,9 @@ public:
 	Particle(sf::Vector2f pos, sf::Vector3f color);
 	~Particle();
 
-	void Update(const float& deltaTime, const bool& mousePressed);
-	void Draw() const;
+	void Update(const sf::Time& deltaTime);
+
+	void ChangeVelocity(const sf::Vector2f velocity);
 
 	inline sf::Vector2f GetPosition() const { return m_Position; }
 	inline sf::Vector3f GetColor() const { return m_Color; }
