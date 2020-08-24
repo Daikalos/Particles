@@ -5,6 +5,8 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
+#include "Utility.h"
+
 struct Vertex
 {
 	GLfloat x, y;
@@ -19,9 +21,12 @@ public:
 	Particle(sf::Vector2f pos, sf::Vector3f color);
 	~Particle();
 
-	void Update(const sf::Time& deltaTime);
+	void Update(const sf::Window* window, const float& deltaTime);
 
-	void ChangeVelocity(const sf::Vector2f velocity);
+	inline void MoveToMouse(const sf::Vector2f mousePos) 
+	{
+		m_Velocity = Normalize(Direction(mousePos, m_Position)) * 10.f;
+	}
 
 	inline sf::Vector2f GetPosition() const { return m_Position; }
 	inline sf::Vector3f GetColor() const { return m_Color; }
