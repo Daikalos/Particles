@@ -23,17 +23,15 @@ public:
 
 	void Update(const sf::Window* window, const float& deltaTime);
 
-	void MoveToMouse(const sf::Vector2f mousePos) 
+	inline void ApplyForce(const sf::Vector2f& force) 
 	{
-		if (Length(Direction(mousePos, m_Position)) < FLT_EPSILON) return;
-
-		m_Velocity += Normalize(Direction(mousePos, m_Position)) * Clamp((1.0f / Length(Direction(mousePos, m_Position))), 1.0f, FLT_MAX) * 100.0f;
+		m_Velocity += force;
 	}
 
 	inline sf::Vector2f GetPosition() const { return m_Position; }
-	inline sf::Vector3f GetColor() const { return m_Color; }
-
 	inline sf::Vector2f GetVelocity() const { return m_Velocity; }
+
+	inline sf::Vector3f GetColor() const { return m_Color; }
 
 private:
 	float m_Friction;

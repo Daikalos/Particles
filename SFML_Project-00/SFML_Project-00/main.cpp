@@ -1,5 +1,5 @@
 #include <iostream>
-#include <chrono>
+#include <functional>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
@@ -7,32 +7,41 @@
 #include <gl/GLU.h>
 
 #include "Particle.h"
-#include "Params.h"
 
 #define MAX_PARTICLES_X 1000
-#define MAX_PARTICLES_Y 500
+#define MAX_PARTICLES_Y 1000
 
 #define PARTICLE_COUNT MAX_PARTICLES_X * MAX_PARTICLES_Y
 
 #define VERTEX_CHUNK PARTICLE_COUNT / 4
 
-void Update(Params p)
+void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, bool* lmb, int index)
 {
 	sf::Clock clock;
-	float deltaTime = FLT_EPSILON;
 
-	while (p.window->isOpen())
+	bool leftClick = false;
+	bool rightClick = false;
+
+	float deltaTime = (1.0f / 60.0f);
+	float accumulator = 0.0f;
+
+	while (window->isOpen())
 	{
-		deltaTime = clock.restart().asSeconds();
+		float newTime = clock.restart().asSeconds();
+		accumulator += newTime;
 
-		for (int i = (p.index * VERTEX_CHUNK); i < ((p.index + 1) * VERTEX_CHUNK); i++)
+		while (accumulator >= deltaTime)
 		{
-			if (*p.mousePressed)
+			for (int i = (index * VERTEX_CHUNK); i < ((index + 1) * VERTEX_CHUNK); i++)
 			{
-				p.particles[i].MoveToMouse(*p.mousePos);
+				sf::Vector2f pos = particles[i].GetPosition();
+				
+				particles[i].ApplyForce(Normalize(Direction(*mousePos, pos)) * 600.0f * (float)(*lmb));
+
+				particles[i].Update(window, deltaTime);
 			}
 
-			p.particles[i].Update(p.window, deltaTime);
+			accumulator -= deltaTime;
 		}
 	}
 }
@@ -46,7 +55,7 @@ int main()
 
 	sf::Mouse mouse;
 	sf::Vector2f mousePos;
-	bool mousePressed = false;
+	bool lmb = false;
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
 	Vertex* vertices = new Vertex[PARTICLE_COUNT];
@@ -62,25 +71,13 @@ int main()
 			sf::Vector3f color = sf::Vector3f(1.0f, 0.0f, (float)(x * y) / size);
 
 			particles[i] = Particle(pos, color);
-
-			vertices[i].x = pos.x;
-			vertices[i].y = pos.y;
-
-			vertices[i].r = color.x;
-			vertices[i].g = color.y;
-			vertices[i].b = color.z;
 		}
 	}
 
-	Params p00 = { &window, particles, &mousePos, &mousePressed, 0 };
-	Params p01 = { &window, particles, &mousePos, &mousePressed, 1 };
-	Params p02 = { &window, particles, &mousePos, &mousePressed, 2 };
-	Params p03 = { &window, particles, &mousePos, &mousePressed, 3 };
-
-	sf::Thread thread00(&Update, p00);
-	sf::Thread thread01(&Update, p01);
-	sf::Thread thread02(&Update, p02);
-	sf::Thread thread03(&Update, p03);
+	sf::Thread thread00(std::bind(&Update, &window, particles, &mousePos, &lmb, 0));
+	sf::Thread thread01(std::bind(&Update, &window, particles, &mousePos, &lmb, 1));
+	sf::Thread thread02(std::bind(&Update, &window, particles, &mousePos, &lmb, 2));
+	sf::Thread thread03(std::bind(&Update, &window, particles, &mousePos, &lmb, 3));
 
 	thread00.launch();
 	thread01.launch();
@@ -92,7 +89,7 @@ int main()
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPointSize(1);
+	glPointSize(1.0f);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -120,13 +117,13 @@ int main()
 				case sf::Event::MouseButtonPressed:
 					if (event.mouseButton.button == sf::Mouse::Left)
 					{
-						mousePressed = true;
+						lmb = true;
 					}
 					break;
 				case sf::Event::MouseButtonReleased:
 					if (event.mouseButton.button == sf::Mouse::Left)
 					{
-						mousePressed = false;
+						lmb = false;
 					}
 					break;
 			}
@@ -136,6 +133,10 @@ int main()
 		{
 			vertices[i].x = particles[i].GetPosition().x;
 			vertices[i].y = particles[i].GetPosition().y;
+
+			vertices[i].r = ((150.0f + vertices[i].y) / window.getSize().y);
+			vertices[i].r = particles[i].GetColor().y;
+			vertices[i].r = particles[i].GetColor().z;
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);

@@ -52,5 +52,5 @@ void Particle::Update(const sf::Window* window, const float& deltaTime)
 	}
 
 	m_Position += nextPos;
-	m_Velocity *= 0.97f;
+	m_Velocity *= 0.95f;
 }
