@@ -9,7 +9,7 @@
 #include "Particle.h"
 #include "Params.h"
 
-#define MAX_PARTICLES_X 500
+#define MAX_PARTICLES_X 1000
 #define MAX_PARTICLES_Y 500
 
 #define PARTICLE_COUNT MAX_PARTICLES_X * MAX_PARTICLES_Y
@@ -25,8 +25,13 @@ void Update(Params p)
 	{
 		deltaTime = clock.restart().asSeconds();
 
-		for (int i = 0; i < VERTEX_CHUNK * p.index; i++)
+		for (int i = (p.index * VERTEX_CHUNK); i < ((p.index + 1) * VERTEX_CHUNK); i++)
 		{
+			if (*p.mousePressed)
+			{
+				p.particles[i].MoveToMouse(*p.mousePos);
+			}
+
 			p.particles[i].Update(p.window, deltaTime);
 		}
 	}
@@ -34,14 +39,13 @@ void Update(Params p)
 
 int main()
 {
-	sf::Window window(sf::VideoMode(800, 600), "OpenGL");
+	sf::Window window(sf::VideoMode(1280, 720), "OpenGL");
 
 	window.setFramerateLimit(60);
 	window.setActive(true);
 
 	sf::Mouse mouse;
-	sf::Vector2i mousePos;
-
+	sf::Vector2f mousePos;
 	bool mousePressed = false;
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
@@ -68,10 +72,10 @@ int main()
 		}
 	}
 
-	Params p00 = { &window, particles, 1 };
-	Params p01 = { &window, particles, 2 };
-	Params p02 = { &window, particles, 3 };
-	Params p03 = { &window, particles, 4 };
+	Params p00 = { &window, particles, &mousePos, &mousePressed, 0 };
+	Params p01 = { &window, particles, &mousePos, &mousePressed, 1 };
+	Params p02 = { &window, particles, &mousePos, &mousePressed, 2 };
+	Params p03 = { &window, particles, &mousePos, &mousePressed, 3 };
 
 	sf::Thread thread00(&Update, p00);
 	sf::Thread thread01(&Update, p01);
@@ -84,18 +88,23 @@ int main()
 	thread03.launch();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPointSize(1);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	glScalef(1.0f, -1.0f, 1.0f);
 	gluOrtho2D(0, window.getSize().x, 0, window.getSize().y);
-	glScalef(1.0f, 1.0f, 1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
 	while (window.isOpen())
 	{
-		mousePressed = false;
-		mousePos = mouse.getPosition(window);
+		mousePos = sf::Vector2f((float)mouse.getPosition(window).x, (float)mouse.getPosition(window).y);
 
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -114,16 +123,17 @@ int main()
 						mousePressed = true;
 					}
 					break;
+				case sf::Event::MouseButtonReleased:
+					if (event.mouseButton.button == sf::Mouse::Left)
+					{
+						mousePressed = false;
+					}
+					break;
 			}
 		}
 
 		for (int i = 0; i < PARTICLE_COUNT; i++)
 		{
-			if (mousePressed)
-			{
-				particles[i].MoveToMouse(sf::Vector2f(mousePos.x, mousePos.y));
-			}
-
 			vertices[i].x = particles[i].GetPosition().x;
 			vertices[i].y = particles[i].GetPosition().y;
 		}
