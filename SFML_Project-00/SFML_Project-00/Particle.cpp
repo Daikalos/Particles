@@ -22,6 +22,7 @@ void Particle::Update(const sf::Window* window, const float& deltaTime)
 {
 	const sf::Vector2f nextPos = m_Velocity * deltaTime;
 
+#if WALL_COLLISION
 	if (m_Position.x + nextPos.x < 0.0f)
 	{
 		m_Position.x = 0.0f;
@@ -50,7 +51,8 @@ void Particle::Update(const sf::Window* window, const float& deltaTime)
 
 		return;
 	}
+#endif
 
 	m_Position += nextPos;
-	m_Velocity *= 0.95f;
+	m_Velocity *= 0.99f;
 }

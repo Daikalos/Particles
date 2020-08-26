@@ -7,6 +7,8 @@
 
 #include "Utility.h"
 
+#define WALL_COLLISION 0
+
 struct Vertex
 {
 	GLfloat x, y;

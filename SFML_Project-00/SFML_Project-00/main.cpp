@@ -50,7 +50,7 @@ int main()
 
 	sf::Mouse mouse;
 	sf::Vector2f mousePos;
-	sf::Vector2f mouseOldPos;
+	sf::Vector2i mouseOldPos;
 
 	int force = 0;
 
@@ -88,15 +88,15 @@ int main()
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPointSize(1.0f);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glScalef(1.0f, -1.0f, 1.0f);
 	gluOrtho2D(0, window.getSize().x, 0, window.getSize().y);
+
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPointSize(1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -123,11 +123,11 @@ int main()
 					}
 					break;
 				case sf::Event::MouseWheelScrolled:
-					if (event.mouseWheelScroll.delta == -1)
+					if (event.mouseWheelScroll.delta == 1)
 					{
 						cameraScale *= 1.15f;
 					}
-					if (event.mouseWheelScroll.delta == 1)
+					if (event.mouseWheelScroll.delta == -1)
 					{
 						cameraScale *= 0.85f;
 					}
@@ -136,6 +136,7 @@ int main()
 					if (event.mouseButton.button == sf::Mouse::Middle)
 					{
 						moveCamera = true;
+						mouseOldPos = mouse.getPosition(window);
 					}
 					if (event.mouseButton.button == sf::Mouse::Left)
 					{
@@ -157,17 +158,22 @@ int main()
 					}
 					break;
 				case sf::Event::MouseMoved:
-					mousePos = sf::Vector2f((float)mouse.getPosition(window).x - cameraPositionX, (float)mouse.getPosition(window).y - cameraPositionY) / cameraScale;
+					mousePos = sf::Vector2f(
+						(float)mouse.getPosition(window).x - cameraPositionX, 
+						(float)mouse.getPosition(window).y - cameraPositionY) / cameraScale;
 
 					if (!moveCamera)
 					{
 						break;
 					}
 
-					const sf::Vector2f deltaPos = ((mousePos * cameraScale) - (mouseOldPos * cameraScale));
+					const sf::Vector2i mouseNewPos = mouse.getPosition(window);
+					const sf::Vector2i deltaPos = mouseNewPos - mouseOldPos;
 
 					cameraPositionX += deltaPos.x;
 					cameraPositionY += deltaPos.y;
+
+					mouseOldPos = mouseNewPos;
 					break;
 			}
 		}
@@ -197,8 +203,6 @@ int main()
 		glPopMatrix();
 
 		window.display();
-
-		mouseOldPos = mousePos;
 	}
 
 	return 0;
