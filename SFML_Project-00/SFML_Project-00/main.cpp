@@ -15,12 +15,9 @@
 
 #define VERTEX_CHUNK PARTICLE_COUNT / 4
 
-void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, bool* lmb, int index)
+void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int* force, int index)
 {
 	sf::Clock clock;
-
-	bool leftClick = false;
-	bool rightClick = false;
 
 	float deltaTime = (1.0f / 60.0f);
 	float accumulator = 0.0f;
@@ -34,9 +31,7 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, boo
 		{
 			for (int i = (index * VERTEX_CHUNK); i < ((index + 1) * VERTEX_CHUNK); i++)
 			{
-				sf::Vector2f pos = particles[i].GetPosition();
-				
-				particles[i].ApplyForce(Normalize(Direction(*mousePos, pos)) * 600.0f * (float)(*lmb));
+				particles[i].ApplyForce(Normalize(Direction(*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*force));
 
 				particles[i].Update(window, deltaTime);
 			}
@@ -48,14 +43,21 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, boo
 
 int main()
 {
-	sf::Window window(sf::VideoMode(1280, 720), "OpenGL");
+	sf::Window window(sf::VideoMode(1600, 900), "Particles");
 
 	window.setFramerateLimit(60);
 	window.setActive(true);
 
 	sf::Mouse mouse;
 	sf::Vector2f mousePos;
-	bool lmb = false;
+	sf::Vector2f mouseOldPos;
+
+	int force = 0;
+
+	bool moveCamera = false;
+	float cameraPositionX = 0.0f;
+	float cameraPositionY = 0.0f;
+	float cameraScale = 1.0f;
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
 	Vertex* vertices = new Vertex[PARTICLE_COUNT];
@@ -68,16 +70,16 @@ int main()
 			int i = y * MAX_PARTICLES_X + x;
 
 			sf::Vector2f pos = sf::Vector2f((float)x, (float)y);
-			sf::Vector3f color = sf::Vector3f(1.0f, 0.0f, (float)(x * y) / size);
+			sf::Vector3f color = sf::Vector3f(0.1f + ((float)(x * y) / size), 0.0f, 0.0f);
 
 			particles[i] = Particle(pos, color);
 		}
 	}
 
-	sf::Thread thread00(std::bind(&Update, &window, particles, &mousePos, &lmb, 0));
-	sf::Thread thread01(std::bind(&Update, &window, particles, &mousePos, &lmb, 1));
-	sf::Thread thread02(std::bind(&Update, &window, particles, &mousePos, &lmb, 2));
-	sf::Thread thread03(std::bind(&Update, &window, particles, &mousePos, &lmb, 3));
+	sf::Thread thread00(std::bind(&Update, &window, particles, &mousePos, &force, 0));
+	sf::Thread thread01(std::bind(&Update, &window, particles, &mousePos, &force, 1));
+	sf::Thread thread02(std::bind(&Update, &window, particles, &mousePos, &force, 2));
+	sf::Thread thread03(std::bind(&Update, &window, particles, &mousePos, &force, 3));
 
 	thread00.launch();
 	thread01.launch();
@@ -101,8 +103,6 @@ int main()
 
 	while (window.isOpen())
 	{
-		mousePos = sf::Vector2f((float)mouse.getPosition(window).x, (float)mouse.getPosition(window).y);
-
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -114,17 +114,60 @@ int main()
 				case sf::Event::Resized:
 					glViewport(0, 0, event.size.width, event.size.height);
 					break;
+				case sf::Event::KeyPressed:
+					if (event.key.code == sf::Keyboard::Space)
+					{
+						cameraPositionX = 0.0f;
+						cameraPositionY = 0.0f;
+						cameraScale = 1.0f;
+					}
+					break;
+				case sf::Event::MouseWheelScrolled:
+					if (event.mouseWheelScroll.delta == -1)
+					{
+						cameraScale *= 1.15f;
+					}
+					if (event.mouseWheelScroll.delta == 1)
+					{
+						cameraScale *= 0.85f;
+					}
+					break;
 				case sf::Event::MouseButtonPressed:
+					if (event.mouseButton.button == sf::Mouse::Middle)
+					{
+						moveCamera = true;
+					}
 					if (event.mouseButton.button == sf::Mouse::Left)
 					{
-						lmb = true;
+						force = 1;
+					}
+					if (event.mouseButton.button == sf::Mouse::Right)
+					{
+						force = -1;
 					}
 					break;
 				case sf::Event::MouseButtonReleased:
-					if (event.mouseButton.button == sf::Mouse::Left)
+					if (event.mouseButton.button == sf::Mouse::Middle)
 					{
-						lmb = false;
+						moveCamera = false;
 					}
+					if (event.mouseButton.button == sf::Mouse::Left || event.mouseButton.button == sf::Mouse::Right)
+					{
+						force = 0;
+					}
+					break;
+				case sf::Event::MouseMoved:
+					mousePos = sf::Vector2f((float)mouse.getPosition(window).x - cameraPositionX, (float)mouse.getPosition(window).y - cameraPositionY) / cameraScale;
+
+					if (!moveCamera)
+					{
+						break;
+					}
+
+					const sf::Vector2f deltaPos = ((mousePos * cameraScale) - (mouseOldPos * cameraScale));
+
+					cameraPositionX += deltaPos.x;
+					cameraPositionY += deltaPos.y;
 					break;
 			}
 		}
@@ -134,14 +177,17 @@ int main()
 			vertices[i].x = particles[i].GetPosition().x;
 			vertices[i].y = particles[i].GetPosition().y;
 
-			vertices[i].r = ((150.0f + vertices[i].y) / window.getSize().y);
-			vertices[i].r = particles[i].GetColor().y;
-			vertices[i].r = particles[i].GetColor().z;
+			vertices[i].r = particles[i].GetColor().x;
+			vertices[i].g = particles[i].GetColor().y;
+			vertices[i].b = particles[i].GetColor().z;
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glPushMatrix();
+
+		glTranslatef(cameraPositionX, cameraPositionY, 0);
+		glScalef(cameraScale, cameraScale, 1.0f);
 
 		glVertexPointer(2, GL_FLOAT, sizeof(Vertex), vertices);
 		glColorPointer(3, GL_FLOAT, sizeof(Vertex), &vertices[0].r);
@@ -151,6 +197,8 @@ int main()
 		glPopMatrix();
 
 		window.display();
+
+		mouseOldPos = mousePos;
 	}
 
 	return 0;
