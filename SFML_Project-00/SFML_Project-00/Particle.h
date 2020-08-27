@@ -25,7 +25,7 @@ public:
 
 	void Update(const sf::Window* window, const float& deltaTime);
 
-	inline void ApplyForce(const sf::Vector2f& force) 
+	void ApplyForce(const sf::Vector2f& force) 
 	{
 		m_Velocity += force;
 	}

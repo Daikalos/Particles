@@ -123,14 +123,7 @@ int main()
 					}
 					break;
 				case sf::Event::MouseWheelScrolled:
-					if (event.mouseWheelScroll.delta == 1)
-					{
-						cameraScale *= 1.15f;
-					}
-					if (event.mouseWheelScroll.delta == -1)
-					{
-						cameraScale *= 0.85f;
-					}
+					cameraScale *= (event.mouseWheelScroll.delta == 1) ? 1.15f : 0.85f;
 					break;
 				case sf::Event::MouseButtonPressed:
 					if (event.mouseButton.button == sf::Mouse::Middle)
@@ -162,18 +155,16 @@ int main()
 						(float)mouse.getPosition(window).x - cameraPositionX, 
 						(float)mouse.getPosition(window).y - cameraPositionY) / cameraScale;
 
-					if (!moveCamera)
+					if (moveCamera)
 					{
-						break;
+						const sf::Vector2i mouseNewPos = mouse.getPosition(window);
+						const sf::Vector2i deltaPos = mouseNewPos - mouseOldPos;
+
+						cameraPositionX += deltaPos.x;
+						cameraPositionY += deltaPos.y;
+
+						mouseOldPos = mouseNewPos;
 					}
-
-					const sf::Vector2i mouseNewPos = mouse.getPosition(window);
-					const sf::Vector2i deltaPos = mouseNewPos - mouseOldPos;
-
-					cameraPositionX += deltaPos.x;
-					cameraPositionY += deltaPos.y;
-
-					mouseOldPos = mouseNewPos;
 					break;
 			}
 		}
