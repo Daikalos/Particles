@@ -61,6 +61,7 @@ int main()
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
 	Vertex* vertices = new Vertex[PARTICLE_COUNT];
+	Color* colors = new Color[PARTICLE_COUNT];
 
 	float size = PARTICLE_COUNT;
 	for (int x = 0; x < MAX_PARTICLES_X; x++)
@@ -174,20 +175,20 @@ int main()
 			vertices[i].x = particles[i].GetPosition().x;
 			vertices[i].y = particles[i].GetPosition().y;
 
-			vertices[i].r = particles[i].GetColor().x;
-			vertices[i].g = particles[i].GetColor().y;
-			vertices[i].b = particles[i].GetColor().z;
+			colors[i].r = particles[i].GetColor().x;
+			colors[i].g = particles[i].GetColor().y;
+			colors[i].b = particles[i].GetColor().z;
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glVertexPointer(2, GL_FLOAT, sizeof(Vertex), vertices);
+		glColorPointer(3, GL_FLOAT, sizeof(Color), colors);
 
 		glPushMatrix();
 
 		glTranslatef(cameraPositionX, cameraPositionY, 0);
 		glScalef(cameraScale, cameraScale, 1.0f);
-
-		glVertexPointer(2, GL_FLOAT, sizeof(Vertex), vertices);
-		glColorPointer(3, GL_FLOAT, sizeof(Vertex), &vertices[0].r);
 
 		glDrawArrays(GL_POINTS, 0, PARTICLE_COUNT);
 
