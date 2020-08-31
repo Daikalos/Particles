@@ -29,7 +29,7 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int
 
 		while (accumulator >= deltaTime)
 		{
-			for (int i = (index * VERTEX_CHUNK); i < ((index + 1) * VERTEX_CHUNK); i++)
+			for (int i = (index * VERTEX_CHUNK); i < ((index + 1) * VERTEX_CHUNK); ++i)
 			{
 				particles[i].ApplyForce(Normalize(Direction(*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*force));
 
@@ -64,9 +64,9 @@ int main()
 	Color* colors = new Color[PARTICLE_COUNT];
 
 	float size = PARTICLE_COUNT;
-	for (int x = 0; x < MAX_PARTICLES_X; x++)
+	for (int x = 0; x < MAX_PARTICLES_X; ++x)
 	{
-		for (int y = 0; y < MAX_PARTICLES_Y; y++)
+		for (int y = 0; y < MAX_PARTICLES_Y; ++y)
 		{
 			int i = y * MAX_PARTICLES_X + x;
 
