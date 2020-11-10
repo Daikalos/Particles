@@ -8,14 +8,14 @@
 
 #include "Particle.h"
 
-#define MAX_PARTICLES_X 1000
-#define MAX_PARTICLES_Y 1000
+const size_t MAX_PARTICLES_X = 1500;
+const size_t MAX_PARTICLES_Y = 1300;
 
-#define PARTICLE_COUNT MAX_PARTICLES_X * MAX_PARTICLES_Y
+const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 
-#define VERTEX_CHUNK PARTICLE_COUNT / 4
+const size_t PARTICLE_CHUNK = PARTICLE_COUNT / 6;
 
-void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int* force, int index)
+void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int* force, size_t index)
 {
 	sf::Clock clock;
 
@@ -29,7 +29,7 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int
 
 		while (accumulator >= deltaTime)
 		{
-			for (int i = (index * VERTEX_CHUNK); i < ((index + 1) * VERTEX_CHUNK); ++i)
+			for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
 			{
 				particles[i].ApplyForce(Normalize(Direction(*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*force));
 
@@ -45,7 +45,7 @@ int main()
 {
 	sf::Window window(sf::VideoMode(1600, 900), "Particles");
 
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(144);
 	window.setActive(true);
 
 	sf::Mouse mouse;
@@ -64,11 +64,11 @@ int main()
 	Color* colors = new Color[PARTICLE_COUNT];
 
 	float size = PARTICLE_COUNT;
-	for (int x = 0; x < MAX_PARTICLES_X; ++x)
+	for (int y = 0; y < MAX_PARTICLES_Y; ++y)
 	{
-		for (int y = 0; y < MAX_PARTICLES_Y; ++y)
+		for (int x = 0; x < MAX_PARTICLES_Y; ++x)
 		{
-			int i = y * MAX_PARTICLES_X + x;
+			int i = x + y * MAX_PARTICLES_X;
 
 			sf::Vector2f pos = sf::Vector2f((float)x, (float)y);
 			sf::Vector3f color = sf::Vector3f(0.1f + ((float)(x * y) / size), 0.0f, 0.0f);
@@ -81,11 +81,15 @@ int main()
 	sf::Thread thread01(std::bind(&Update, &window, particles, &mousePos, &force, 1));
 	sf::Thread thread02(std::bind(&Update, &window, particles, &mousePos, &force, 2));
 	sf::Thread thread03(std::bind(&Update, &window, particles, &mousePos, &force, 3));
+	sf::Thread thread04(std::bind(&Update, &window, particles, &mousePos, &force, 4));
+	sf::Thread thread05(std::bind(&Update, &window, particles, &mousePos, &force, 5));
 
 	thread00.launch();
 	thread01.launch();
 	thread02.launch();
 	thread03.launch();
+	thread04.launch();
+	thread05.launch();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -172,12 +176,15 @@ int main()
 
 		for (int i = 0; i < PARTICLE_COUNT; i++)
 		{
-			vertices[i].x = particles[i].GetPosition().x;
-			vertices[i].y = particles[i].GetPosition().y;
+			const sf::Vector2f pos = particles[i].GetPosition();
+			const sf::Vector3f col = particles[i].GetColor();
 
-			colors[i].r = particles[i].GetColor().x;
-			colors[i].g = particles[i].GetColor().y;
-			colors[i].b = particles[i].GetColor().z;
+			vertices[i].x = pos.x;
+			vertices[i].y = pos.y;
+
+			colors[i].r = col.x;
+			colors[i].g = col.y;
+			colors[i].b = col.z;
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
