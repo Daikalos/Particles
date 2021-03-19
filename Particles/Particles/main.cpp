@@ -32,7 +32,7 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int
 		for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
 		{
 			particles[i].ApplyForce(
-				Vec2f::normalize(Vec2f::direction((sf::Vector2f)*mousePos, particles[i].GetPosition())) * 1000.0f * (float)(*applyForce));
+				Vec2f::normalize(Vec2f::direction((sf::Vector2f)*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*applyForce));
 
 			particles[i].Update(window, deltaTime);
 		}
@@ -41,7 +41,7 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(1600, 900), "Particles");
+	sf::Window window(sf::VideoMode(2240, 1260), "Particles");
 
 	window.setFramerateLimit(144);
 	window.setActive(true);

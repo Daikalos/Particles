@@ -25,9 +25,9 @@ void Particle::Update(const sf::Window* window, float deltaTime)
 		return;
 #endif
 
-	m_Velocity += m_Acceleration * deltaTime;
 	m_Position += m_Velocity * deltaTime;
-
+	m_Velocity += m_Acceleration * deltaTime;
+	
 	m_Acceleration *= m_Friction;
 }
 
@@ -36,28 +36,28 @@ bool Particle::WallCollision(const sf::Window* window)
 	if (m_Position.x + m_Velocity.x < 0.0f)
 	{
 		m_Position.x = 0.0f;
-		m_Acceleration.x *= -1;
+		m_Velocity.x *= -1;
 
 		return true;
 	}
 	else if (m_Position.x + m_Velocity.x > window->getSize().x)
 	{
 		m_Position.x = (float)window->getSize().x;
-		m_Acceleration.x *= -1;
+		m_Velocity.x *= -1;
 
 		return true;
 	}
 	else if (m_Position.y + m_Velocity.y < 0.0f)
 	{
 		m_Position.y = 0.0f;
-		m_Acceleration.y *= -1;
+		m_Velocity.y *= -1;
 
 		return true;
 	}
 	else if (m_Position.y + m_Velocity.y > window->getSize().y)
 	{
 		m_Position.y = (float)window->getSize().y;
-		m_Acceleration.y *= -1;
+		m_Velocity.y *= -1;
 
 		return true;
 	}
