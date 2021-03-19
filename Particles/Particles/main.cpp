@@ -7,57 +7,49 @@
 #include <gl/GLU.h>
 
 #include "Particle.h"
+#include "Camera.h"
+#include "Utilities.h"
+#include "Vector2.h"
 
 const size_t MAX_PARTICLES_X = 1500;
 const size_t MAX_PARTICLES_Y = 1300;
 
 const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 
-const size_t PARTICLE_CHUNK = PARTICLE_COUNT / 6;
+const size_t THREAD_COUNT = 6;
+const size_t PARTICLE_CHUNK = PARTICLE_COUNT / THREAD_COUNT;
 
-void Update(sf::Window* window, Particle* particles, sf::Vector2f* mousePos, int* force, size_t index)
+void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int* applyForce, size_t index)
 {
 	sf::Clock clock;
 
-	float deltaTime = (1.0f / 60.0f);
-	float accumulator = 0.0f;
+	float deltaTime = FLT_EPSILON;
 
 	while (window->isOpen())
 	{
-		float newTime = clock.restart().asSeconds();
-		accumulator += newTime;
+		deltaTime = clock.restart().asSeconds();
 
-		while (accumulator >= deltaTime)
+		for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
 		{
-			for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
-			{
-				particles[i].ApplyForce(Normalize(Direction(*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*force));
+			particles[i].ApplyForce(
+				Vec2f::normalize(Vec2f::direction((sf::Vector2f)*mousePos, particles[i].GetPosition())) * 1000.0f * (float)(*applyForce));
 
-				particles[i].Update(window, deltaTime);
-			}
-
-			accumulator -= deltaTime;
+			particles[i].Update(window, deltaTime);
 		}
 	}
 }
 
 int main()
 {
-	sf::Window window(sf::VideoMode(1600, 900), "Particles");
+	sf::RenderWindow window(sf::VideoMode(1600, 900), "Particles");
 
 	window.setFramerateLimit(144);
 	window.setActive(true);
 
-	sf::Mouse mouse;
-	sf::Vector2f mousePos;
-	sf::Vector2i mouseOldPos;
+	int applyForce = 0;
 
-	int force = 0;
-
-	bool moveCamera = false;
-	float cameraPositionX = 0.0f;
-	float cameraPositionY = 0.0f;
-	float cameraScale = 1.0f;
+	Camera* camera = new Camera(window);
+	sf::Vector2i mousePos;
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
 	Vertex* vertices = new Vertex[PARTICLE_COUNT];
@@ -77,19 +69,16 @@ int main()
 		}
 	}
 
-	sf::Thread thread00(std::bind(&Update, &window, particles, &mousePos, &force, 0));
-	sf::Thread thread01(std::bind(&Update, &window, particles, &mousePos, &force, 1));
-	sf::Thread thread02(std::bind(&Update, &window, particles, &mousePos, &force, 2));
-	sf::Thread thread03(std::bind(&Update, &window, particles, &mousePos, &force, 3));
-	sf::Thread thread04(std::bind(&Update, &window, particles, &mousePos, &force, 4));
-	sf::Thread thread05(std::bind(&Update, &window, particles, &mousePos, &force, 5));
+	std::vector<sf::Thread*> threads;
 
-	thread00.launch();
-	thread01.launch();
-	thread02.launch();
-	thread03.launch();
-	thread04.launch();
-	thread05.launch();
+	for (size_t i = 0; i < THREAD_COUNT; ++i)
+		threads.push_back(new sf::Thread(std::bind(&Update, &window, particles, &mousePos, &applyForce, i)));
+
+	std::for_each(threads.begin(), threads.end(),
+	[](sf::Thread* thread)
+	{
+		thread->launch();
+	});
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -119,62 +108,20 @@ int main()
 				case sf::Event::Resized:
 					glViewport(0, 0, event.size.width, event.size.height);
 					break;
-				case sf::Event::KeyPressed:
-					if (event.key.code == sf::Keyboard::Space)
-					{
-						cameraPositionX = 0.0f;
-						cameraPositionY = 0.0f;
-						cameraScale = 1.0f;
-					}
-					break;
-				case sf::Event::MouseWheelScrolled:
-					cameraScale *= (event.mouseWheelScroll.delta == 1) ? 1.15f : 0.85f;
-					break;
-				case sf::Event::MouseButtonPressed:
-					if (event.mouseButton.button == sf::Mouse::Middle)
-					{
-						moveCamera = true;
-						mouseOldPos = mouse.getPosition(window);
-					}
-					if (event.mouseButton.button == sf::Mouse::Left)
-					{
-						force = 1;
-					}
-					if (event.mouseButton.button == sf::Mouse::Right)
-					{
-						force = -1;
-					}
-					break;
-				case sf::Event::MouseButtonReleased:
-					if (event.mouseButton.button == sf::Mouse::Middle)
-					{
-						moveCamera = false;
-					}
-					if (event.mouseButton.button == sf::Mouse::Left || event.mouseButton.button == sf::Mouse::Right)
-					{
-						force = 0;
-					}
-					break;
-				case sf::Event::MouseMoved:
-					mousePos = sf::Vector2f(
-						(float)mouse.getPosition(window).x - cameraPositionX, 
-						(float)mouse.getPosition(window).y - cameraPositionY) / cameraScale;
-
-					if (moveCamera)
-					{
-						const sf::Vector2i mouseNewPos = mouse.getPosition(window);
-						const sf::Vector2i deltaPos = mouseNewPos - mouseOldPos;
-
-						cameraPositionX += deltaPos.x;
-						cameraPositionY += deltaPos.y;
-
-						mouseOldPos = mouseNewPos;
-					}
-					break;
 			}
+
+			camera->poll_event(event);
 		}
 
-		for (int i = 0; i < PARTICLE_COUNT; i++)
+		mousePos = camera->get_mouse_world_position();
+
+		applyForce = 0;
+		if (camera->get_left_hold())
+			applyForce = 1;
+		if (camera->get_right_hold())
+			applyForce = -1;
+
+		for (int i = 0; i < PARTICLE_COUNT; ++i)
 		{
 			const sf::Vector2f pos = particles[i].GetPosition();
 			const sf::Vector3f col = particles[i].GetColor();
@@ -194,8 +141,8 @@ int main()
 
 		glPushMatrix();
 
-		glTranslatef(cameraPositionX, cameraPositionY, 0);
-		glScalef(cameraScale, cameraScale, 1.0f);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf(camera->world_matrix());
 
 		glDrawArrays(GL_POINTS, 0, PARTICLE_COUNT);
 

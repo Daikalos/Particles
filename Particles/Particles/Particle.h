@@ -5,8 +5,6 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
-#include "Utility.h"
-
 #define WALL_COLLISION 0
 
 struct Vertex
@@ -27,7 +25,7 @@ public:
 	Particle(sf::Vector2f pos, sf::Vector3f color);
 	~Particle();
 
-	void Update(const sf::Window* window, const float& deltaTime);
+	void Update(const sf::Window* window, float deltaTime);
 
 	void ApplyForce(const sf::Vector2f& force) 
 	{

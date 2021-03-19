@@ -10,7 +10,7 @@ Particle::Particle(sf::Vector2f pos, sf::Vector3f color) :
 	m_Position(pos), m_Color(color)
 {
 	m_Velocity = sf::Vector2f();
-	m_Friction = 0.99f;
+	m_Friction = 0.01f;
 }
 
 Particle::~Particle()
@@ -18,19 +18,17 @@ Particle::~Particle()
 
 }
 
-void Particle::Update(const sf::Window* window, const float& deltaTime)
+void Particle::Update(const sf::Window* window, float deltaTime)
 {
-	m_Velocity += m_Acceleration * deltaTime;
-
 #if WALL_COLLISION
 	if (WallCollision(window))
 		return;
 #endif
 
-	m_Position += m_Velocity;
+	m_Velocity += m_Acceleration * deltaTime;
+	m_Position += m_Velocity * deltaTime;
 
-	m_Velocity *= m_Friction;
-	m_Acceleration *= 0.0f;
+	m_Acceleration *= m_Friction;
 }
 
 bool Particle::WallCollision(const sf::Window* window)
