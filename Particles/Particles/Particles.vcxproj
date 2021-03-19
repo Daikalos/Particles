@@ -75,23 +75,23 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <IncludePath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Tobias\Documents\GitHub\SFML_Project-00\SFML_Project-00\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tobias\Documents\GitHub\Particles\Particles\Dependencies\SFML\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
   </PropertyGroup>
