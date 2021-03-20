@@ -1,5 +1,6 @@
 #include <iostream>
 #include <functional>
+#include <thread>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
@@ -21,21 +22,23 @@ const size_t PARTICLE_CHUNK = PARTICLE_COUNT / THREAD_COUNT;
 
 void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int* applyForce, size_t index)
 {
-	sf::Clock clock;
+	sf::Clock* clock = new sf::Clock();
 
 	float deltaTime = FLT_EPSILON;
-
+	
 	while (window->isOpen())
 	{
-		deltaTime = clock.restart().asSeconds();
-
 		for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
 		{
-			particles[i].ApplyForce(
-				Vec2f::normalize(Vec2f::direction((sf::Vector2f)*mousePos, particles[i].GetPosition())) * 100.0f * (float)(*applyForce));
+			Particle* const particle = &particles[i];
 
-			particles[i].Update(window, deltaTime);
+			const sf::Vector2f direction = Vec2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
+			particle->ApplyForce(Vec2f::normalize(direction) * 200.0f * (float)(*applyForce));
+
+			particle->Update(window, deltaTime);
 		}
+
+		deltaTime = clock->restart().asSeconds();
 	}
 }
 

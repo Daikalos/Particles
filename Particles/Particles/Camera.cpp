@@ -56,7 +56,10 @@ void Camera::mouse_moved(const sf::Event& event)
 }
 void Camera::mouse_wheel_scrolled(const sf::Event& event)
 {
-	scale *= (event.mouseWheelScroll.delta == 1) ? 1.15f : 0.85f;
+	if (event.mouseWheelScroll.delta < 0)
+		scale *= 0.85f;
+	if (event.mouseWheelScroll.delta > 0)
+		scale *= 1.15f;
 }
 void Camera::mouse_button_pressed(const sf::Event& event)
 {
