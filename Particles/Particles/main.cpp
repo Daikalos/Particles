@@ -20,7 +20,7 @@ const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 const size_t THREAD_COUNT = 6;
 const size_t PARTICLE_CHUNK = PARTICLE_COUNT / THREAD_COUNT;
 
-void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int* applyForce, size_t index)
+int Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int* applyForce, size_t index)
 {
 	sf::Clock* clock = new sf::Clock();
 
@@ -32,14 +32,18 @@ void Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int
 		{
 			Particle* const particle = &particles[i];
 
-			const sf::Vector2f direction = Vec2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
-			particle->ApplyForce(Vec2f::normalize(direction) * 200.0f * (float)(*applyForce));
+			const sf::Vector2f direction = v2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
+			particle->ApplyForce(v2f::normalize(direction) * 150.0f * (float)(*applyForce));
 
 			particle->Update(window, deltaTime);
 		}
 
 		deltaTime = clock->restart().asSeconds();
 	}
+
+	delete clock;
+
+	return 0;
 }
 
 int main()
@@ -93,7 +97,7 @@ int main()
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPointSize(1.0f);
+	glPointSize(2.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -126,15 +130,8 @@ int main()
 
 		for (int i = 0; i < PARTICLE_COUNT; ++i)
 		{
-			const sf::Vector2f pos = particles[i].GetPosition();
-			const sf::Vector3f col = particles[i].GetColor();
-
-			vertices[i].x = pos.x;
-			vertices[i].y = pos.y;
-
-			colors[i].r = col.x;
-			colors[i].g = col.y;
-			colors[i].b = col.z;
+			vertices[i] = *(Vertex*)(&particles[i].GetPosition());
+			colors[i] = *(Color*)(&particles[i].GetColor());
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -153,6 +150,11 @@ int main()
 
 		window.display();
 	}
+
+	delete camera;
+	delete[] particles;
+	delete[] vertices;
+	delete[] colors;
 
 	return 0;
 }

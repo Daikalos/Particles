@@ -4,7 +4,7 @@
 
 #include <SFML/Graphics.hpp>
 
-template<typename T> struct Vec2
+template<typename T> struct v2
 {
 public:
 	static inline float length(const sf::Vector2<T>& vector)
@@ -15,11 +15,11 @@ public:
 	{
 		return atan2(vector.y, vector.x);
 	}
-	static inline float angle(const sf::Vector2<T> lhs, const sf::Vector2<T> rhs)
+	static inline float angle(const sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)
 	{
 		return acos(dot(lhs, rhs) / (length(lhs) * length(rhs)));
 	}
-	static inline float dot(const sf::Vector2<T> lhs, const sf::Vector2<T> rhs)
+	static inline float dot(const sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y;
 	}
@@ -66,12 +66,12 @@ public:
 	}
 
 private:
-	Vec2() = delete;
+	v2() = delete;
 };
 
-typedef Vec2<int> Vec2i;
-typedef Vec2<float> Vec2f;
-typedef Vec2<double> Vec2d;
+typedef v2<int> v2i;
+typedef v2<float> v2f;
+typedef v2<double> v2d;
 
 template <typename T> 
 static sf::Vector2<T> operator /=(sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)

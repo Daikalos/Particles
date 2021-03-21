@@ -5,7 +5,7 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
-#define WALL_COLLISION 1
+#define WALL_COLLISION 0
 
 struct Vertex
 {
@@ -27,7 +27,7 @@ public:
 
 	void Update(const sf::Window* window, float deltaTime);
 
-	void ApplyForce(const sf::Vector2f& force) 
+	inline void ApplyForce(const sf::Vector2f& force) 
 	{
 		m_Acceleration += force;
 	}

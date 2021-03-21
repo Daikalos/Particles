@@ -13,9 +13,6 @@ public:
 
 	void poll_event(const sf::Event& event);
 
-	/// <summary>
-	/// does not give accurate coordinates...
-	/// </summary>
 	template<typename T>
 	sf::Vector2<T> view_to_world(const sf::Vector2<T>& position) const;
 
@@ -30,23 +27,17 @@ private:
 public:
 	inline const float* world_matrix() const
 	{
-		sf::Transform world_matrix;
-		world_matrix = world_matrix
+		return sf::Transform()
 			.translate((sf::Vector2f)window.getSize() / 2.0f)
 			.scale(scale, scale)
-			.translate(-position);
-
-		return world_matrix.getMatrix();
+			.translate(-position).getMatrix();
 	}
 	inline sf::Transform view_matrix() const
 	{
-		sf::Transform view_matrix;
-		view_matrix = view_matrix
+		return sf::Transform()
 			.translate(position)
 			.scale(1.0f / scale, 1.0f / scale)
-			.translate((sf::Vector2f)window.getSize() / -2.0f);
-
-		return view_matrix;
+			.translate((sf::Vector2f)window.getSize() / -2.0f);;
 	}
 
 	inline sf::Vector2f get_position() const { return position; }
