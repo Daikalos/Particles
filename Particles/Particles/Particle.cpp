@@ -5,6 +5,7 @@ Particle::Particle()
 	m_Velocity = sf::Vector2f();
 	m_Acceleration = sf::Vector2f();
 	m_Friction = 0.1f;
+	m_Mass = 1.0f;
 }
 
 Particle::Particle(sf::Vector2f pos, sf::Vector3f color) :
@@ -13,6 +14,7 @@ Particle::Particle(sf::Vector2f pos, sf::Vector3f color) :
 	m_Velocity = sf::Vector2f();
 	m_Acceleration = sf::Vector2f();
 	m_Friction = 0.1f;
+	m_Mass = 1.0f;
 }
 
 Particle::~Particle()

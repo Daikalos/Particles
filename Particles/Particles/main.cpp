@@ -12,8 +12,8 @@
 #include "Utilities.h"
 #include "Vector2.h"
 
-const size_t MAX_PARTICLES_X = 1500;
-const size_t MAX_PARTICLES_Y = 1300;
+const size_t MAX_PARTICLES_X = 1400;
+const size_t MAX_PARTICLES_Y = 1425;
 
 const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 
@@ -32,8 +32,11 @@ int Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int*
 		{
 			Particle* const particle = &particles[i];
 
-			const sf::Vector2f direction = v2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
-			particle->ApplyForce(v2f::normalize(direction) * 150.0f * (float)(*applyForce));
+			if (*applyForce != 0)
+			{
+				const sf::Vector2f direction = v2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
+				particle->ApplyForce(v2f::normalize(direction) * 150.0f * (float)*applyForce);
+			}
 
 			particle->Update(window, deltaTime);
 		}

@@ -29,7 +29,7 @@ public:
 
 	inline void ApplyForce(const sf::Vector2f& force) 
 	{
-		m_Acceleration += force;
+		m_Acceleration += force / m_Mass;
 	}
 
 	inline sf::Vector2f GetPosition() const { return m_Position; }
@@ -43,6 +43,7 @@ private:
 
 private:
 	float m_Friction;
+	float m_Mass;
 
 	sf::Vector2f m_Position;
 	sf::Vector2f m_Velocity;
