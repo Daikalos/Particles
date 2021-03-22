@@ -81,11 +81,3 @@ static sf::Vector2<T> operator /=(sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs
 	return lhs;
 }
 
-template <typename T>
-static sf::Vector2<T> operator /=(sf::Vector2<T>& lhs, const T& rhs)
-{
-	lhs.x /= rhs;
-	lhs.y /= rhs;
-	return lhs;
-}
-

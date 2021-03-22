@@ -76,6 +76,8 @@ int main()
 			sf::Vector3f color = sf::Vector3f(0.1f + ((float)(x * y) / size), 0.0f, 0.0f);
 
 			particles[i] = Particle(pos, color);
+
+			colors[i] = *(Color*)(&particles[i].GetColor());
 		}
 	}
 
@@ -132,10 +134,7 @@ int main()
 			applyForce = -1;
 
 		for (int i = 0; i < PARTICLE_COUNT; ++i)
-		{
 			vertices[i] = *(Vertex*)(&particles[i].GetPosition());
-			colors[i] = *(Color*)(&particles[i].GetColor());
-		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
 

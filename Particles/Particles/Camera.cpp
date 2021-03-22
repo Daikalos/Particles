@@ -31,12 +31,6 @@ void Camera::poll_event(const sf::Event& event)
 	}
 }
 
-template<typename T>
-sf::Vector2<T> Camera::view_to_world(const sf::Vector2<T>& position) const
-{
-	return (sf::Vector2<T>)(view_matrix() * (sf::Vector2f)position);
-}
-
 void Camera::key_pressed(const sf::Event& event)
 {
 	if (event.key.code == sf::Keyboard::Space)
@@ -49,10 +43,8 @@ void Camera::key_pressed(const sf::Event& event)
 
 void Camera::mouse_moved(const sf::Event& event)
 {
-	sf::Vector2i deltaDragPos = get_mouse_world_position();
-
 	if (moveCamera)
-		position += (sf::Vector2f)(dragPos - deltaDragPos);
+		position += (sf::Vector2f)(dragPos - get_mouse_world_position());
 }
 void Camera::mouse_wheel_scrolled(const sf::Event& event)
 {

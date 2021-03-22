@@ -14,7 +14,10 @@ public:
 	void poll_event(const sf::Event& event);
 
 	template<typename T>
-	sf::Vector2<T> view_to_world(const sf::Vector2<T>& position) const;
+	inline sf::Vector2<T> view_to_world(const sf::Vector2<T>& position) const
+	{
+		return (sf::Vector2<T>)(view_matrix() * (sf::Vector2f)position);
+	}
 
 private:
 	void key_pressed(const sf::Event& event);

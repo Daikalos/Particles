@@ -39,7 +39,7 @@ public:
 	inline sf::Vector3f GetColor() const { return m_Color; }
 
 private:
-	bool WallCollision(const sf::Window* window, const sf::Vector2f& nextPos);
+	bool WallCollision(const sf::Window* window);
 
 private:
 	float m_Friction;
