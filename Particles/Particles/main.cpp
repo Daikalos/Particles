@@ -119,8 +119,6 @@ int main()
 					break;
 				case sf::Event::Resized:
 				{
-					window.setSize({ event.size.width, event.size.height });
-
 					glViewport(0, 0, window.getSize().x, window.getSize().y);
 					glMatrixMode(GL_PROJECTION);
 					glLoadIdentity();
