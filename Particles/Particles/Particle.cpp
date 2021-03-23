@@ -29,7 +29,7 @@ void Particle::Update(const sf::Window* window, float deltaTime)
 	m_Velocity += m_Acceleration * deltaTime - m_Velocity * m_Friction;
 
 #if WALL_COLLISION
-	if (WallCollision(window, nextPos))
+	if (WallCollision(window))
 		return;
 #endif
 }

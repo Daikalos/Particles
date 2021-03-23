@@ -118,8 +118,17 @@ int main()
 					window.close();
 					break;
 				case sf::Event::Resized:
-					glViewport(0, 0, event.size.width, event.size.height);
-					break;
+				{
+					window.setSize({ event.size.width, event.size.height });
+
+					glViewport(0, 0, window.getSize().x, window.getSize().y);
+					glMatrixMode(GL_PROJECTION);
+					glLoadIdentity();
+					glScalef(1.0f, -1.0f, 1.0f);
+					gluOrtho2D(0, window.getSize().x, 0, window.getSize().y);
+					glMatrixMode(GL_MODELVIEW);
+				} 
+				break;
 			}
 
 			camera->poll_event(event);
