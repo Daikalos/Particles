@@ -1,4 +1,5 @@
 #include <iostream>
+#include <execution>
 #include <functional>
 #include <thread>
 
@@ -17,44 +18,13 @@ const size_t MAX_PARTICLES_Y = 1425;
 
 const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 
-const size_t THREAD_COUNT = 6;
-const size_t PARTICLE_CHUNK = PARTICLE_COUNT / THREAD_COUNT;
-
-int Update(sf::Window* window, Particle* particles, sf::Vector2i* mousePos, int* applyForce, size_t index)
-{
-	sf::Clock* clock = new sf::Clock();
-
-	float deltaTime = FLT_EPSILON;
-	
-	while (window->isOpen())
-	{
-		for (size_t i = (index * PARTICLE_CHUNK); i < ((index + 1) * PARTICLE_CHUNK); ++i)
-		{
-			Particle* const particle = &particles[i];
-
-			if (*applyForce != 0)
-			{
-				const sf::Vector2f direction = v2f::direction((sf::Vector2f)*mousePos, particle->GetPosition());
-				particle->ApplyForce(v2f::normalize(direction) * 150.0f * (float)*applyForce);
-			}
-
-			particle->Update(window, deltaTime);
-		}
-
-		deltaTime = clock->restart().asSeconds();
-	}
-
-	delete clock;
-
-	return 0;
-}
-
 int main()
 {
 	sf::Window window(sf::VideoMode(2240, 1260), "Particles");
-
-	window.setFramerateLimit(144);
 	window.setActive(true);
+
+	sf::Clock clock;
+	float deltaTime = FLT_EPSILON;
 
 	int applyForce = 0;
 
@@ -81,17 +51,6 @@ int main()
 		}
 	}
 
-	std::vector<sf::Thread*> threads;
-
-	for (size_t i = 0; i < THREAD_COUNT; ++i)
-		threads.push_back(new sf::Thread(std::bind(&Update, &window, particles, &mousePos, &applyForce, i)));
-
-	std::for_each(threads.begin(), threads.end(),
-	[](sf::Thread* thread)
-	{
-		thread->launch();
-	});
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	glMatrixMode(GL_PROJECTION);
@@ -109,6 +68,8 @@ int main()
 
 	while (window.isOpen())
 	{
+		deltaTime = clock.restart().asSeconds();
+
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -139,6 +100,21 @@ int main()
 			applyForce = 1;
 		if (camera->get_right_hold())
 			applyForce = -1;
+
+		std::for_each(
+			std::execution::par_unseq,
+			particles,
+			particles + PARTICLE_COUNT,
+			[&](Particle& particle)
+			{
+				if (applyForce != 0)
+				{
+					const sf::Vector2f direction = v2f::direction((sf::Vector2f)mousePos, particle.GetPosition());
+					particle.ApplyForce(v2f::normalize(direction) * 150.0f * (float)applyForce);
+				}
+
+				particle.Update(&window, deltaTime);
+			});
 
 		for (int i = 0; i < PARTICLE_COUNT; ++i)
 			vertices[i] = *(Vertex*)(&particles[i].GetPosition());
