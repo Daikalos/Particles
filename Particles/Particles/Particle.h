@@ -5,7 +5,7 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
-#define WALL_COLLISION 0
+#define WALL_COLLISION 1
 
 struct Vertex
 {
@@ -39,7 +39,7 @@ public:
 	inline sf::Vector3f GetColor() const { return m_Color; }
 
 private:
-	bool WallCollision(const sf::Window* window);
+	bool WallCollision(const sf::Window* window, const sf::Vector2f& oldPos);
 
 private:
 	float m_Friction;

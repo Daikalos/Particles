@@ -42,7 +42,7 @@ int main()
 		{
 			int i = x + y * MAX_PARTICLES_X;
 
-			sf::Vector2f pos = sf::Vector2f((float)x, (float)y);
+			sf::Vector2f pos = sf::Vector2f(x % window.getSize().x, y % window.getSize().y);
 			sf::Vector3f color = sf::Vector3f(0.1f + ((float)(x * y) / size), 0.0f, 0.0f);
 
 			particles[i] = Particle(pos, color);

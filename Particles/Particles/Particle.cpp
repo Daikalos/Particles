@@ -24,54 +24,40 @@ Particle::~Particle()
 
 void Particle::Update(const sf::Window* window, float deltaTime)
 {
-	m_Acceleration += -m_Velocity * m_Friction;
+	const sf::Vector2f oldPosition = m_Position;
 	m_Position += m_Velocity * deltaTime + (m_Acceleration * deltaTime * deltaTime * 0.5f);
-	m_Velocity += m_Acceleration * deltaTime - m_Velocity * m_Friction;
 
 #if WALL_COLLISION
-	if (WallCollision(window))
+	if (WallCollision(window, oldPosition))
 		return;
 #endif
+
+	m_Velocity += m_Acceleration * deltaTime - m_Velocity * m_Friction;
+	m_Acceleration += -m_Velocity * m_Friction;
 }
 
-bool Particle::WallCollision(const sf::Window* window)
+bool Particle::WallCollision(const sf::Window* window, const sf::Vector2f& oldPos)
 {
-	if (m_Position.x < 0.0f)
+	bool collision = false;
+
+	if (m_Position.x < 0.0f || m_Position.x > window->getSize().x)
 	{
-		m_Position.x = 0.0f;
+		m_Position.x = oldPos.x;
 
 		m_Velocity.x *= -1;
 		m_Acceleration.x *= -1;
 
-		return true;
+		collision = true;
 	}
-	else if (m_Position.x > window->getSize().x)
+	if (m_Position.y < 0.0f || m_Position.y > window->getSize().y)
 	{
-		m_Position.x = (float)window->getSize().x;
-
-		m_Velocity.x *= -1;
-		m_Acceleration.x *= -1;
-
-		return true;
-	}
-	else if (m_Position.y < 0.0f)
-	{
-		m_Position.y = 0.0f;
+		m_Position.y = oldPos.y;
 
 		m_Velocity.y *= -1;
 		m_Acceleration.y *= -1;
 
-		return true;
-	}
-	else if (m_Position.y > window->getSize().y)
-	{
-		m_Position.y = (float)window->getSize().y;
-
-		m_Velocity.y *= -1;
-		m_Acceleration.y *= -1;
-
-		return true;
+		collision = true;
 	}
 
-	return false;
+	return collision;
 }
