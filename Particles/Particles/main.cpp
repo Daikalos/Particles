@@ -13,8 +13,8 @@
 #include "Utilities.h"
 #include "Vector2.h"
 
-const size_t MAX_PARTICLES_X = 1400;
-const size_t MAX_PARTICLES_Y = 1425;
+const size_t MAX_PARTICLES_X = 1500;
+const size_t MAX_PARTICLES_Y = 1500;
 
 const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
 
@@ -61,7 +61,7 @@ int main()
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPointSize(2.0f);
+	glPointSize(1.0f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -113,11 +113,14 @@ int main()
 					particle.ApplyForce(v2f::normalize(direction) * 150.0f * (float)applyForce);
 				}
 
-				particle.Update(&window, deltaTime);
+				particle.Update(window, deltaTime);
 			});
 
 		for (int i = 0; i < PARTICLE_COUNT; ++i)
+		{
 			vertices[i] = *(Vertex*)(&particles[i].GetPosition());
+			colors[i] = *(Color*)(&particles[i].GetColor());
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
 

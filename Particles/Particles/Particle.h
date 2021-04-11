@@ -25,7 +25,7 @@ public:
 	Particle(sf::Vector2f pos, sf::Vector3f color);
 	~Particle();
 
-	void Update(const sf::Window* window, float deltaTime);
+	void Update(const sf::Window& window, float deltaTime);
 
 	inline void ApplyForce(const sf::Vector2f& force) 
 	{
@@ -39,7 +39,7 @@ public:
 	inline sf::Vector3f GetColor() const { return m_Color; }
 
 private:
-	void WallCollision(const sf::Window* window, const sf::Vector2f& oldPos);
+	void WallCollision(const sf::Window& window, const sf::Vector2f& oldPos);
 
 private:
 	float m_Friction;
