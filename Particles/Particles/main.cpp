@@ -37,7 +37,6 @@ int main()
 
 	float size = PARTICLE_COUNT;
 	for (int y = 0; y < MAX_PARTICLES_Y; ++y)
-	{
 		for (int x = 0; x < MAX_PARTICLES_Y; ++x)
 		{
 			int i = x + y * MAX_PARTICLES_X;
@@ -49,7 +48,6 @@ int main()
 
 			colors[i] = *(Color*)(&particles[i].GetColor());
 		}
-	}
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -110,7 +108,7 @@ int main()
 				if (applyForce != 0)
 				{
 					const sf::Vector2f direction = v2f::direction((sf::Vector2f)mousePos, particle.GetPosition());
-					particle.ApplyForce(v2f::normalize(direction) * 150.0f * (float)applyForce);
+					particle.ApplyForce(v2f::normalize(direction) * 100.0f * (float)applyForce);
 				}
 
 				particle.Update(window, deltaTime);

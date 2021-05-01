@@ -24,18 +24,18 @@ Particle::~Particle()
 
 void Particle::Update(const sf::Window& window, float deltaTime)
 {
-	m_Velocity += m_Acceleration * deltaTime - m_Friction * m_Velocity;
+	m_Acceleration += -m_Friction * m_Velocity;
 
 	const sf::Vector2f oldPosition = m_Position;
-	m_Position += m_Velocity * deltaTime;
+	m_Position += m_Velocity * deltaTime + (0.5f * m_Acceleration * deltaTime * deltaTime);
+
+	m_Velocity += m_Acceleration * deltaTime - m_Friction * m_Velocity;
 
 #if WALL_COLLISION
 	WallCollision(window, oldPosition);
 #endif
 
-	m_Acceleration += -m_Friction * m_Velocity;
-
-	m_Color = sf::Vector3f((m_Position.x * m_Position.y) / (window.getSize().x * window.getSize().y), 0.05f, 0.40f);
+	m_Color = sf::Vector3f((m_Position.x * m_Position.y) / (window.getSize().x * window.getSize().y), 0.10f, 0.40f) * 1.75f;
 }
 
 void Particle::WallCollision(const sf::Window& window, const sf::Vector2f& oldPos)
