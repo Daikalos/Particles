@@ -7,16 +7,6 @@
 
 #define WALL_COLLISION 1
 
-struct Vertex
-{
-	GLfloat x, y;
-};
-
-struct Color
-{
-	GLfloat r, g, b;
-};
-
 class Particle
 {
 public:

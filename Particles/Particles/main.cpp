@@ -12,11 +12,22 @@
 #include "Camera.h"
 #include "Utilities.h"
 #include "Vector2.h"
+#include "InputHandler.h"
 
-const size_t MAX_PARTICLES_X = 1500;
-const size_t MAX_PARTICLES_Y = 1500;
+const size_t MAX_PARTICLES_X = 2000;
+const size_t MAX_PARTICLES_Y = 1000;
 
 const size_t PARTICLE_COUNT = MAX_PARTICLES_X * MAX_PARTICLES_Y;
+
+struct Vertex
+{
+	GLfloat x, y;
+};
+
+struct Color
+{
+	GLfloat r, g, b;
+};
 
 int main()
 {
@@ -28,12 +39,18 @@ int main()
 
 	int applyForce = 0;
 
-	Camera* camera = new Camera(window);
+	Camera camera(window);
+	InputHandler inputHandler;
+
 	sf::Vector2i mousePos;
 
 	Particle* particles = new Particle[PARTICLE_COUNT];
 	Vertex* vertices = new Vertex[PARTICLE_COUNT];
 	Color* colors = new Color[PARTICLE_COUNT];
+
+	memset(particles, NULL, sizeof(Particle) * PARTICLE_COUNT);
+	memset(vertices, NULL, sizeof(Vertex) * PARTICLE_COUNT);
+	memset(colors, NULL, sizeof(Color) * PARTICLE_COUNT);
 
 	float size = PARTICLE_COUNT;
 	for (int y = 0; y < MAX_PARTICLES_Y; ++y)
@@ -64,9 +81,12 @@ int main()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	while (window.isOpen())
+	bool running = true;
+	while (running)
 	{
 		deltaTime = clock.restart().asSeconds();
+
+		inputHandler.update();
 
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -74,7 +94,7 @@ int main()
 			switch (event.type)
 			{
 				case sf::Event::Closed:
-					window.close();
+					running = false;
 					break;
 				case sf::Event::Resized:
 				{
@@ -86,17 +106,20 @@ int main()
 					glMatrixMode(GL_MODELVIEW);
 				} 
 				break;
+				case sf::Event::MouseWheelScrolled:
+					inputHandler.set_scrollDelta(event.mouseWheelScroll.delta);
+					break;
 			}
-
-			camera->poll_event(event);
 		}
 
-		mousePos = camera->get_mouse_world_position();
+		camera.update(inputHandler);
+
+		mousePos = camera.get_mouse_world_position();
 
 		applyForce = 0;
-		if (camera->get_left_hold())
+		if (inputHandler.get_left_held())
 			applyForce = 1;
-		if (camera->get_right_hold())
+		if (inputHandler.get_right_held())
 			applyForce = -1;
 
 		std::for_each(
@@ -128,7 +151,7 @@ int main()
 		glPushMatrix();
 
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(camera->world_matrix());
+		glLoadMatrixf(camera.get_world_matrix());
 
 		glDrawArrays(GL_POINTS, 0, PARTICLE_COUNT);
 
@@ -137,7 +160,6 @@ int main()
 		window.display();
 	}
 
-	delete camera;
 	delete[] particles;
 	delete[] vertices;
 	delete[] colors;
