@@ -107,6 +107,7 @@ int main()
 				} 
 				break;
 				case sf::Event::MouseWheelScrolled:
+					std::cout << 1.0f / deltaTime << std::endl;
 					inputHandler.set_scrollDelta(event.mouseWheelScroll.delta);
 					break;
 			}
@@ -135,18 +136,11 @@ int main()
 				}
 
 				particle.Update(window, deltaTime);
-			});
 
-		std::for_each(
-			std::execution::par_unseq,
-			particles,
-			particles + PARTICLE_COUNT,
-			[&](Particle& particle)
-			{
 				int i = &particle - particles;
 
-				vertices[i] = *(Vertex*)(&particles[i].GetPosition());
-				colors[i] = *(Color*)(&particles[i].GetColor());
+				vertices[i] = *(Vertex*)(&particle.GetPosition());
+				colors[i] = *(Color*)(&particle.GetColor());
 			});
 
 		glClear(GL_COLOR_BUFFER_BIT);
