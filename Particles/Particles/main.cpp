@@ -137,11 +137,17 @@ int main()
 				particle.Update(window, deltaTime);
 			});
 
-		for (int i = 0; i < PARTICLE_COUNT; ++i)
-		{
-			vertices[i] = *(Vertex*)(&particles[i].GetPosition());
-			colors[i] = *(Color*)(&particles[i].GetColor());
-		}
+		std::for_each(
+			std::execution::par_unseq,
+			particles,
+			particles + PARTICLE_COUNT,
+			[&](Particle& particle)
+			{
+				int i = &particle - particles;
+
+				vertices[i] = *(Vertex*)(&particles[i].GetPosition());
+				colors[i] = *(Color*)(&particles[i].GetColor());
+			});
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
