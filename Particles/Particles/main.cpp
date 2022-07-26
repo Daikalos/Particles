@@ -31,7 +31,7 @@ struct Color
 
 int main()
 {
-	sf::Window window(sf::VideoMode(2240, 1260), "Particles");
+	sf::Window window(sf::VideoMode::getDesktopMode(), "Particles", sf::Style::Fullscreen);
 	window.setActive(true);
 
 	sf::Clock clock;
@@ -81,8 +81,10 @@ int main()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	bool running = true;
-	while (running)
+	glVertexPointer(2, GL_FLOAT, sizeof(Vertex), vertices);
+	glColorPointer(3, GL_FLOAT, sizeof(Color), colors);
+
+	while (window.isOpen())
 	{
 		deltaTime = clock.restart().asSeconds();
 
@@ -94,7 +96,7 @@ int main()
 			switch (event.type)
 			{
 				case sf::Event::Closed:
-					running = false;
+					window.close();
 					break;
 				case sf::Event::Resized:
 				{
@@ -107,7 +109,6 @@ int main()
 				} 
 				break;
 				case sf::Event::MouseWheelScrolled:
-					std::cout << 1.0f / deltaTime << std::endl;
 					inputHandler.set_scrollDelta(event.mouseWheelScroll.delta);
 					break;
 			}
@@ -115,13 +116,14 @@ int main()
 
 		camera.update(inputHandler);
 
-		mousePos = camera.get_mouse_world_position();
-
 		applyForce = 0;
 		if (inputHandler.get_left_held())
 			applyForce = 1;
 		if (inputHandler.get_right_held())
 			applyForce = -1;
+
+		if (applyForce != 0)
+			mousePos = camera.get_mouse_world_position();
 
 		std::for_each(
 			std::execution::par_unseq,
@@ -144,9 +146,6 @@ int main()
 			});
 
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glVertexPointer(2, GL_FLOAT, sizeof(Vertex), vertices);
-		glColorPointer(3, GL_FLOAT, sizeof(Color), colors);
 
 		glPushMatrix();
 
